@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Get Place response",
+  "description": "The live service returns numbers as strings, types as a comma-joined string and location as latitude/longitude (documented as lat/lng), so both forms are accepted.",
+  "type": "object",
+  "required": ["location", "accuracy", "name", "phone_number", "address", "types", "website", "language"],
+  "properties": {
+    "location": {
+      "type": "object",
+      "anyOf": [
+        { "required": ["lat", "lng"] },
+        { "required": ["latitude", "longitude"] }
+      ],
+      "properties": {
+        "lat": { "type": ["string", "number"] },
+        "lng": { "type": ["string", "number"] },
+        "latitude": { "type": ["string", "number"] },
+        "longitude": { "type": ["string", "number"] }
+      }
+    },
+    "accuracy": { "type": ["string", "integer"] },
+    "name": { "type": "string" },
+    "phone_number": { "type": "string" },
+    "address": { "type": "string" },
+    "types": { "type": ["string", "array"] },
+    "website": { "type": "string" },
+    "language": { "type": "string" }
+  }
+}

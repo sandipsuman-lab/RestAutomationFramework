@@ -1,0 +1,43 @@
+# Test data for data-driven AddPlace / GetPlace scenarios.
+# Each record is selected by testCaseId; the other fields override the addPlace.json template
+# (nested keys and lists keep their JSON shape) and are the expected values on read-back.
+- testCaseId: TC_PLACE_01
+  name: Frontline house
+  address: 29, side layout, cohen 09
+  language: French-IN
+  phone_number: (+91) 983 893 3937
+  website: http://google.com
+  accuracy: 50
+  location:
+    lat: -38.383494
+    lng: 33.427362
+  types:
+    - shoe park
+    - shop
+
+- testCaseId: TC_PLACE_02
+  name: Sea View Cafe
+  address: 12 Marine Drive, Mumbai
+  language: English-IN
+  phone_number: (+91) 900 111 2222
+  website: http://seaviewcafe.example.com
+  accuracy: 30
+  location:
+    lat: 18.9435
+    lng: 72.823
+  types:
+    - cafe
+    - restaurant
+
+- testCaseId: TC_PLACE_03
+  name: Old Town Library
+  address: 5 Heritage Lane, Pune
+  language: Marathi-IN
+  phone_number: (+91) 911 222 3333
+  website: http://library.example.com
+  accuracy: 90
+  location:
+    lat: 18.5204
+    lng: 73.8567
+  types:
+    - library

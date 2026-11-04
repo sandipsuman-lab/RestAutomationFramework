@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Add Place response",
+  "type": "object",
+  "required": ["status", "place_id", "scope", "reference", "id"],
+  "properties": {
+    "status": { "type": "string", "enum": ["OK"] },
+    "place_id": { "type": "string", "pattern": "^[0-9a-f]{32}$" },
+    "scope": { "type": "string" },
+    "reference": { "type": "string", "minLength": 1 },
+    "id": { "type": "string", "minLength": 1 }
+  }
+}

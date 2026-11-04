@@ -1,0 +1,32 @@
+# Endpoint catalogue: everything needed to call an API, keyed by apiName (DataType.apiName).
+#   Request URL = baseUrl + "/" + resource, plus queryParams on every call.
+#   ${...} values resolve against the active Spring profile (application.yml), so the same entries
+#   point at the local stub or the live service.
+# Steps call endpoints by name:  When user calls "AddPlaceAPI" with "POST" http request
+apis:
+  - apiName: places
+    baseUrl: "${places.base-url}"            # https://rahulshettyacademy.com (local profile: WireMock)
+    queryParams:
+      key: "${places.api-key}"               # qaclick123
+    responseContentType: application/json    # checked on every 2xx response
+    endpoints:
+      # POST {baseUrl}/maps/api/place/add/json?key=qaclick123
+      AddPlaceAPI:
+        method: POST
+        resource: /maps/api/place/add/json
+        description: Add a new place
+      # GET {baseUrl}/maps/api/place/get/json?key=qaclick123&place_id={place_id}
+      GetPlaceAPI:
+        method: GET
+        resource: /maps/api/place/get/json
+        description: Get the details of a place (place_id query param)
+      # PUT {baseUrl}/maps/api/place/update/json?key=qaclick123&place_id={place_id}
+      UpdatePlaceAPI:
+        method: PUT
+        resource: /maps/api/place/update/json
+        description: Update the address of a place
+      # POST {baseUrl}/maps/api/place/delete/json?key=qaclick123
+      DeletePlaceAPI:
+        method: POST
+        resource: /maps/api/place/delete/json
+        description: Delete a place (place_id in the body)

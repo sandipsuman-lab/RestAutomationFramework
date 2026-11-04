@@ -1,0 +1,122 @@
+name: API Tests CI
+
+# Runs the Places API suite against the live URL (https://rahulshettyacademy.com):
+#   - on every push and pull request to main / master / develop
+#   - every day at 02:30 UTC
+#   - on demand from the Actions tab ("Run workflow"), with an optional tag expression and thread count
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+  schedule:
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: Cucumber tag expression, e.g. "@AddPlace and @smoke"
+        required: false
+        default: "not @wip"
+        type: string
+      threads:
+        description: Parallel scenario threads
+        required: false
+        default: "1"
+        type: string
+
+permissions:
+  contents: read
+
+# A newer push to the same branch cancels the run still in progress.
+concurrency:
+  group: api-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api-tests:
+    name: Places API tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # Passed through env (not inlined into the script) so tag text cannot inject shell commands.
+      CUCUMBER_TAGS: ${{ inputs.tags || 'not @wip' }}
+      THREADS: ${{ inputs.threads || '1' }}
+      TZ: UTC
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Make Maven wrapper executable
+        run: chmod +x mvnw
+
+      - name: Run API tests
+        # failure.ignore lets the verify phase build the HTML report; the job is failed in a later step.
+        run: >
+          ./mvnw -B -ntp clean verify
+          -Dmaven.test.failure.ignore=true
+          -Dcucumber.filter.tags="$CUCUMBER_TAGS"
+          -Dthreads="$THREADS"
+          -DQARELEASEVERSION="${{ github.sha }}"
+          -DQATESTCYCLE="${{ github.workflow }}-${{ github.run_number }}"
+
+      - name: Write test summary
+        if: always()
+        run: |
+          f=target/surefire-reports/testng-results.xml
+          if [ ! -f "$f" ]; then
+            echo "### API tests did not produce results - check the 'Run API tests' log" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          attr() { grep -o "$1=\"[0-9]*\"" "$f" | head -1 | grep -o '[0-9]*'; }
+          retries=$(grep -c 'retrying' Logs/automation.log 2>/dev/null || true)
+          {
+            echo "### Places API test results"
+            echo ""
+            echo "| Total | Passed | Failed | Skipped |"
+            echo "|---|---|---|---|"
+            echo "| $(attr total) | $(attr passed) | $(attr failed) | $(attr skipped) |"
+            echo ""
+            echo "Tags: \`$CUCUMBER_TAGS\` - threads: $THREADS"
+            echo ""
+            echo "Connection retries: ${retries:-0}"
+            echo ""
+            echo "Download the **api-test-reports** artifact for the Extent Spark, Cucumber and masterthought reports."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-reports-${{ github.run_number }}
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            target/cucumber-reports/
+            target/surefire-reports/
+            reports/
+            Logs/
+
+      - name: Fail job when tests failed
+        if: always()
+        run: |
+          f=target/surefire-reports/testng-results.xml
+          if [ ! -f "$f" ]; then
+            echo "::error::No test results found - the build or test run did not complete"; exit 1
+          fi
+          total=$(grep -o 'total="[0-9]*"' "$f" | head -1 | grep -o '[0-9]*')
+          failed=$(grep -o 'failed="[0-9]*"' "$f" | head -1 | grep -o '[0-9]*')
+          if [ "${total:-0}" -eq 0 ]; then
+            echo "::error::No tests ran - check the tag expression '$CUCUMBER_TAGS'"; exit 1
+          fi
+          if [ "${failed:-0}" -gt 0 ]; then
+            echo "::error::$failed of $total API tests failed - see the uploaded reports"; exit 1
+          fi
+          echo "All $total API tests passed"

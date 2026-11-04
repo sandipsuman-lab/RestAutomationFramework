@@ -1,0 +1,28 @@
+# Framework defaults (bound to ReadConfigYaml, prefix "framework").
+# Lowest precedence: application.yml profiles and -Dframework.* override every value.
+framework:
+  paths:
+    schemas: schemas
+    json-schemas: jsonschema
+    request-files: requestjsonfiles
+    test-data: testdata
+    validation-reports: target/data-validation
+
+  http:
+    connect-timeout-millis: 5000      # short, so a dropped connection attempt is retried quickly
+    connect-retries: 3                # retried only when the connection cannot be opened (nothing sent yet)
+    read-timeout-millis: 120000
+    max-response-time-millis: 30000   # enforced by every ResponseSpecification
+    log-level: ALL                    # ALL | FAILURES | NONE
+    max-log-body-chars: 5000
+    relaxed-https: true
+    masked-headers: [Authorization, client_secret, x-api-key]
+
+  db:
+    opt-out-condition: OPT_OUT_FLAG = FALSE
+    date-time-format: yyyy-MM-dd HH:mm:ss
+    query-timeout-seconds: 300
+
+  validation:
+    # Skipped (at any depth) when comparing payloads with expected-response fixtures.
+    dynamic-fields: [timestamp, traceId, correlationId]

@@ -1,0 +1,24 @@
+{
+  "addPlaceSuccess": {
+    "status": "OK",
+    "place_id": "<regex:^[0-9a-f]{32}$>",
+    "scope": "APP",
+    "reference": "<notEmpty>",
+    "id": "<notEmpty>"
+  },
+  "updatePlaceSuccess": {
+    "msg": "Address successfully updated"
+  },
+  "deletePlaceSuccess": {
+    "status": "OK"
+  },
+  "getPlaceNotFound": {
+    "msg": "<regex:(?i)get operation failed.*doesn't exist.*>"
+  },
+  "updatePlaceNotFound": {
+    "msg": "<regex:(?i).*doesn't exist.*>"
+  },
+  "deletePlaceNotFound": {
+    "msg": "<regex:(?i)delete operation failed.*doesn't exist.*>"
+  }
+}

@@ -1,0 +1,64 @@
+# Spring profiles. Select with -Dspring.profiles.active=<profile> (default: local).
+# Values here override the defaults in config.yml.
+spring:
+  profiles:
+    default: local
+  main:
+    web-application-type: none
+    banner-mode: "off"
+  sql:
+    init:
+      mode: never
+
+# Places API (see ADD-DeletePlaceAPIs.pdf). The key is fixed by the service.
+# Always the live service, in every profile. For an offline run against the local stub (local profile only):
+#   -Dplaces.base-url=http://localhost:8089
+places:
+  base-url: https://rahulshettyacademy.com
+  api-key: qaclick123
+
+mock:
+  server:
+    enabled: false
+
+---
+# Local: in-memory H2 database standing in for Snowflake, and the WireMock Places stub on port 8089.
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: jdbc:h2:mem:warehouse;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/schema-local.sql
+      data-locations: classpath:db/data-local.sql
+
+mock:
+  server:
+    enabled: true
+    port: 8089
+
+db:
+  schema: ANALYTICS
+
+---
+# Stage: Snowflake warehouse; credentials from environment variables.
+spring:
+  config:
+    activate:
+      on-profile: stage
+  datasource:
+    url: jdbc:snowflake://${SNOWFLAKE_ACCOUNT}.snowflakecomputing.com/?db=${SNOWFLAKE_DATABASE:ANALYTICS_DB}&warehouse=${SNOWFLAKE_WAREHOUSE:QA_WH}&role=${SNOWFLAKE_ROLE:QA_READONLY}
+    driver-class-name: net.snowflake.client.jdbc.SnowflakeDriver
+    username: ${SNOWFLAKE_USER}
+    password: ${SNOWFLAKE_PASSWORD}
+    hikari:
+      maximum-pool-size: 4
+
+db:
+  schema: ANALYTICS

@@ -1,0 +1,22 @@
+# Warehouse SQL per API and endpoint variant. Positional ? parameters.
+# {{OPT_OUT_FILTER}} becomes "AND <framework.db.opt-out-condition>" when the subscription has
+# privacy opt-out enabled, and is removed otherwise.
+# Column aliases are lower-cased by the connector and mapped onto models.responsefromdb.*
+snowflakeQueries:
+  - apiName: getItems
+    databaseQueries:
+      byTenant: >-
+        SELECT ITEM_ID, ITEM_NAME, CATEGORY, PRICE, QUANTITY, STATUS, UPDATED_AT, TENANT_ID, DEPARTMENT_ID, OPT_OUT_FLAG
+        FROM ${db.schema}.ITEMS_VW
+        WHERE TENANT_ID = ? AND DEPARTMENT_ID = ? {{OPT_OUT_FILTER}}
+        ORDER BY ITEM_ID
+      byDateRange: >-
+        SELECT ITEM_ID, ITEM_NAME, CATEGORY, PRICE, QUANTITY, STATUS, UPDATED_AT, TENANT_ID, DEPARTMENT_ID, OPT_OUT_FLAG
+        FROM ${db.schema}.ITEMS_VW
+        WHERE TENANT_ID = ? AND DEPARTMENT_ID = ?
+          AND UPDATED_AT BETWEEN CAST(? AS TIMESTAMP) AND CAST(? AS TIMESTAMP) {{OPT_OUT_FILTER}}
+        ORDER BY ITEM_ID
+      byId: >-
+        SELECT ITEM_ID, ITEM_NAME, CATEGORY, PRICE, QUANTITY, STATUS, UPDATED_AT, TENANT_ID, DEPARTMENT_ID, OPT_OUT_FLAG
+        FROM ${db.schema}.ITEMS_VW
+        WHERE ITEM_ID = ?

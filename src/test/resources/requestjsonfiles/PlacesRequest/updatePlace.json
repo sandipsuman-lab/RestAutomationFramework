@@ -1,0 +1,5 @@
+{
+  "place_id": "${ctx:placeId}",
+  "address": "70 winter walk, USA",
+  "key": "${prop:places.api-key}"
+}
