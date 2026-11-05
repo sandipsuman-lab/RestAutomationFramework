@@ -1,11 +1,10 @@
 # Endpoint catalogue: everything needed to call an API, keyed by apiName (DataType.apiName).
 #   Request URL = baseUrl + "/" + resource, plus queryParams on every call.
-#   ${...} values resolve against the active Spring profile (application.yml), so the same entries
-#   point at the local stub or the live service.
+#   ${...} values resolve against application.yml; the Places API always points at production.
 # Steps call endpoints by name:  When user calls "AddPlaceAPI" with "POST" http request
 apis:
   - apiName: places
-    baseUrl: "${places.base-url}"            # https://rahulshettyacademy.com (local profile: WireMock)
+    baseUrl: "${places.base-url}"            # https://rahulshettyacademy.com
     queryParams:
       key: "${places.api-key}"               # qaclick123
     responseContentType: application/json    # checked on every 2xx response

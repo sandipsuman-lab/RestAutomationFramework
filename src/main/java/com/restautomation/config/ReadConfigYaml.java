@@ -43,8 +43,8 @@ public class ReadConfigYaml {
         private int readTimeoutMillis = 120_000;
         /** Upper bound enforced by every response specification. */
         private int maxResponseTimeMillis = 30_000;
-        /** ALL, FAILURES or NONE. */
-        private String logLevel = "ALL";
+        /** FAILURES (error responses and failed calls only), ALL or NONE. */
+        private String logLevel = "FAILURES";
         private int maxLogBodyChars = 5_000;
         private boolean relaxedHttps = true;
         private List<String> maskedHeaders = new ArrayList<>(List.of("Authorization", "client_secret", "x-api-key"));
