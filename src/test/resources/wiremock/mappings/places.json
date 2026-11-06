@@ -1,5 +1,0 @@
-{
-  "name": "Places API (stateful, see PlacesMockExtension)",
-  "request": { "urlPathPattern": "/maps/api/place/.*" },
-  "response": { "transformers": ["places-store"] }
-}

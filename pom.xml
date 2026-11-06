@@ -26,7 +26,6 @@
         <snowflake-jdbc.version>3.16.1</snowflake-jdbc.version>
         <poi.version>5.3.0</poi.version>
         <commons-csv.version>1.11.0</commons-csv.version>
-        <wiremock.version>3.9.2</wiremock.version>
         <extent-cucumber-adapter.version>1.14.0</extent-cucumber-adapter.version>
         <masterthought.version>5.8.1</masterthought.version>
         <lombok.version>1.18.42</lombok.version>
@@ -190,13 +189,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- ===== Local execution: Places API stub + in-memory warehouse ===== -->
-        <dependency>
-            <groupId>org.wiremock</groupId>
-            <artifactId>wiremock-standalone</artifactId>
-            <version>${wiremock.version}</version>
-            <scope>test</scope>
-        </dependency>
+        <!-- ===== Local execution: in-memory warehouse ===== -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>

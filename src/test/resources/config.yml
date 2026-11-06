@@ -13,7 +13,7 @@ framework:
     connect-retries: 3                # retried only when the connection cannot be opened (nothing sent yet)
     read-timeout-millis: 120000
     max-response-time-millis: 30000   # enforced by every ResponseSpecification
-    log-level: ALL                    # ALL | FAILURES | NONE
+    log-level: FAILURES               # FAILURES: log only error responses (400+) and failed calls | ALL | NONE
     max-log-body-chars: 5000
     relaxed-https: true
     masked-headers: [Authorization, client_secret, x-api-key]

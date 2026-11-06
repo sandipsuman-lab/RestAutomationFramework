@@ -9,7 +9,6 @@ for the original design this framework follows.
 ```bash
 ./mvnw clean test                                                  # Places suite (live API) + unit tests
 ./mvnw clean test -Dcucumber.filter.tags="@AddPlace and @smoke"    # one feature / tag
-./mvnw clean test -Dplaces.base-url=http://localhost:8089          # offline, against the local Places stub
 ./mvnw clean verify -Dthreads=4 -Dmaven.test.failure.ignore=true   # parallel + masterthought HTML report
 ```
 
@@ -20,7 +19,6 @@ Requires JDK 17+ (verified on 17 and 26) and internet access for the live Places
 |---|---|
 | Tags (default `not @wip`) | `-Dcucumber.filter.tags="@UpdatePlace"` |
 | Profile (`local` default, `stage` = Snowflake) | `-Dspring.profiles.active=stage` |
-| Places base URL | `-Dplaces.base-url=http://localhost:8089` |
 | Parallel threads | `-Dthreads=4` |
 | Any framework setting | `-Dframework.http.max-response-time-millis=10000` |
 
@@ -66,7 +64,10 @@ for calling this suite from other repositories.
 - **Checks**: response spec, expected-response fixtures (`schemas/PlacesSchema/placesSchema.json`), JSON Schemas
   (`jsonschema/`), field-by-field read-back comparison, response time and headers.
 - **Reports**: each call's request and response payloads appear in the calling step of the Extent Spark report
-  (`reports/AutomationReport/`) and as Cucumber attachments (`target/cucumber-reports/`). Logs go to `Logs/`.
+  (`reports/AutomationReport/`) and as Cucumber attachments (`target/cucumber-reports/`).
+- **Logs** (`Logs/automation.log`): every call goes to production, and only failures are logged — error responses
+  (400+), calls that got no response, and failed scenarios with their last call — plus one result line per scenario.
+  Use `-Dframework.http.log-level=ALL` to log every call for one run.
 
 The live Get Place response differs from the API document: `location` comes back as `latitude`/`longitude`
 (documented `lat`/`lng`), numbers as strings, and `types` as a comma-joined string. The suite accepts these forms

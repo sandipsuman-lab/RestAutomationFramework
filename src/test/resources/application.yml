@@ -11,18 +11,13 @@ spring:
       mode: never
 
 # Places API (see ADD-DeletePlaceAPIs.pdf). The key is fixed by the service.
-# Always the live service, in every profile. For an offline run against the local stub (local profile only):
-#   -Dplaces.base-url=http://localhost:8089
+# Always the production service, in every profile.
 places:
   base-url: https://rahulshettyacademy.com
   api-key: qaclick123
 
-mock:
-  server:
-    enabled: false
-
 ---
-# Local: in-memory H2 database standing in for Snowflake, and the WireMock Places stub on port 8089.
+# Local: in-memory H2 database standing in for Snowflake.
 spring:
   config:
     activate:
@@ -37,11 +32,6 @@ spring:
       mode: always
       schema-locations: classpath:db/schema-local.sql
       data-locations: classpath:db/data-local.sql
-
-mock:
-  server:
-    enabled: true
-    port: 8089
 
 db:
   schema: ANALYTICS

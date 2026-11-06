@@ -1,5 +1,6 @@
 package com.restautomation.hooks;
 
+import com.restautomation.context.HttpExchange;
 import com.restautomation.context.ScenarioContext;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -26,7 +27,7 @@ public class Hooks {
     public void initialiseScenario(Scenario scenario) {
         MDC.put("scenario", scenario.getName());
         context.setScenario(scenario);
-        log.info(">>> START  {} {}", scenario.getName(), scenario.getSourceTagNames());
+        log.debug(">>> START  {} {}", scenario.getName(), scenario.getSourceTagNames());
     }
 
     @After(order = 100)
@@ -34,8 +35,18 @@ public class Hooks {
         if (scenario.isFailed()) {
             attach(scenario, "Last request", context.getLastRequestLog());
             attach(scenario, "Last response", context.getLastResponseLog());
+            // Error responses and failed calls are already logged by RestAssuredFilter; log the last
+            // call here too so a failed assertion on a successful (2xx/3xx) response is also in the log.
+            HttpExchange last = context.getLastExchange();
+            if (last != null && last.statusCode() < 400 && context.getLastRequestLog() != null) {
+                log.error("<<< FAILED {} {}\nLast call:\n{}\n{}", scenario.getName(), scenario.getSourceTagNames(),
+                        context.getLastRequestLog(), context.getLastResponseLog());
+            } else {
+                log.error("<<< FAILED {} {}", scenario.getName(), scenario.getSourceTagNames());
+            }
+        } else {
+            log.info("<<< {} {}", scenario.getStatus(), scenario.getName());
         }
-        log.info("<<< {} {}", scenario.getStatus(), scenario.getName());
         MDC.remove("scenario");
     }
 

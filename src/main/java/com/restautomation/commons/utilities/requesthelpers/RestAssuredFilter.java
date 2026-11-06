@@ -32,14 +32,28 @@ public class RestAssuredFilter implements Filter {
     public Response filter(FilterableRequestSpecification request, FilterableResponseSpecification responseSpec,
                            FilterContext context) {
         long start = System.nanoTime();
-        Response response = context.next(request, responseSpec);
+        String level = config.getHttp().getLogLevel();
+        Response response;
+        try {
+            response = context.next(request, responseSpec);
+        } catch (RuntimeException callFailed) {
+            // No response at all (e.g. connection could not be opened after all retries).
+            String requestLog = describeRequest(request);
+            if (!"NONE".equalsIgnoreCase(level)) {
+                log.error("CALL FAILED after {} ms: {}\n{}", (System.nanoTime() - start) / 1_000_000,
+                        callFailed.getMessage(), requestLog);
+            }
+            recordFailedCall(requestLog, callFailed);
+            throw callFailed;
+        }
         long elapsedMillis = (System.nanoTime() - start) / 1_000_000;
 
         String requestLog = describeRequest(request);
         String responseLog = describeResponse(response, elapsedMillis);
-        String level = config.getHttp().getLogLevel();
         boolean failure = response.statusCode() >= 400;
-        if ("ALL".equalsIgnoreCase(level) || ("FAILURES".equalsIgnoreCase(level) && failure)) {
+        if (failure && !"NONE".equalsIgnoreCase(level)) {
+            log.warn("ERROR RESPONSE\n{}\n{}", requestLog, responseLog);
+        } else if ("ALL".equalsIgnoreCase(level)) {
             log.info("\n{}\n{}", requestLog, responseLog);
         } else {
             log.debug("\n{}\n{}", requestLog, responseLog);
@@ -66,6 +80,17 @@ public class RestAssuredFilter implements Filter {
             scenarioContext.setLastExchange(exchange);
         } catch (RuntimeException outsideScenario) {
             // Called outside a running scenario (e.g. warm-up); nothing to record.
+        }
+    }
+
+    /** Replaces the previous exchange so failure reporting shows the call that failed, not an earlier one. */
+    private void recordFailedCall(String requestLog, RuntimeException callFailed) {
+        try {
+            scenarioContext.setLastRequestLog(requestLog);
+            scenarioContext.setLastResponseLog("NO RESPONSE: " + callFailed);
+            scenarioContext.setLastExchange(null);
+        } catch (RuntimeException outsideScenario) {
+            // Called outside a running scenario; nothing to record.
         }
     }
 
